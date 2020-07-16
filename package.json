@@ -1,0 +1,14 @@
+{
+  "name": "mk-calendar-days",
+  "version": "0.0.1",
+  "description": "just a month",
+  "main": "index.js",
+  "author": "John Galt",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^5.0.1"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test node test/calendar-days.test.js"
+  }
+}
