@@ -4,28 +4,63 @@ function equalDate(dateA, dateB) {
     && dateA.getDate() === dateB.getDate(); 
 }
 
-/*
-function equalMonth(dateA, dateB) {
-  return dateA.getYear === dateB.getYear 
-    && dateA.getMonth() === dateB.getMonth(); 
-}
-*/
-const LocalMonths = [ 
-  'Jan',
-  'Feb',
-  'Mär',
-  'Apr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Okt',
-  'Nov',
-  'Dez'
-];
+function getMonths(givenDate) {
+  const date = givenDate || new Date();
+  const result = []; 
+  for ( let i = 0; i <= 11; i++) {
+    let d = new Date(date.getFullYear(), i, 1, 3); 
 
-module.exports = function calendarDays (dateArg, ) {
+    result.push({
+      selected: date ? ( date.getMonth() === d.getMonth() ) : false, 
+      long: d.toLocaleString('de-DE', {month: 'long'}),
+      short: d.toLocaleString('de-DE', {month: 'short'})
+    }); 
+  }
+
+  return result;
+}
+
+function getWeekDays(givenDate) {
+  let dateWeekStart;
+  const now = new Date();
+  // get first beginning of new week
+  for (let i = 1; i <= 7; i++) {
+    dateWeekStart = new Date(now.getFullYear(), now.getMonth(), i);
+
+    if (dateWeekStart.getDay() === 0) {
+      break; 
+    }
+  }   
+  // English/American weeks start at 0 i.e. sunday
+  // so counting starts one off
+  const result = []; 
+  for ( let i = 1; i <= 7; i++) {
+    let weekDay = new Date(
+      dateWeekStart.getFullYear(), 
+      dateWeekStart.getMonth(),
+      dateWeekStart.getDate() + i,
+      3
+    );
+
+    // this is where the day is pushed on the week
+    result.push({
+      selected: givenDate ? ( givenDate.getDay() === weekDay.getDay() ) : false, 
+      long: weekDay.toLocaleString('de-DE', {weekday: 'long'}),
+      short: weekDay.toLocaleString('de-DE', {weekday: 'short'})
+    }); 
+  }
+
+  return result;
+}
+
+module.exports = function calendarDays (dateArg, optionArgs) {
+
+  const options = Object.assign({
+    yearsStyle: 'short',
+    yearsFrom: new Date().getFullYear() - 5,
+    yearsThrough: new Date().getFullYear() + 5,
+    monthsStyle: 'short'
+  }, optionArgs);
 
   const date = dateArg ? dateArg : new Date(); 
   const dateOptions = { 
@@ -45,9 +80,7 @@ module.exports = function calendarDays (dateArg, ) {
   const firstWeekDayOfMonth = firstDayOfMonth.getDay(); 
   const lastWeekDayOfMonth = lastDayOfMonth.getDay(); 
 
-
   const firstDayOfCal = 1 - ( firstWeekDayOfMonth || 7) + 1; 
-  
 
   const lastDayOfCal = daysOfMonth + (7 - lastWeekDayOfMonth); 
   
@@ -75,7 +108,7 @@ module.exports = function calendarDays (dateArg, ) {
     calWeek.push({ 
       weekDay,
       currentMonth: date.getMonth() === calDate.getMonth(),
-      today: equalDate(calDate, date),
+      currentDay: equalDate(calDate, date),
       day: calDate.getDate(),
       day2: calDate.getDate().toLocaleString('de-DE', digitOptions),
       date: calDate
@@ -86,18 +119,28 @@ module.exports = function calendarDays (dateArg, ) {
   const nextMonth = new Date(year, monthIndex + 1,  1, 3); 
 
   return { 
-    prev: {
-      label: LocalMonths[prevMonth.getMonth()],   
+    prevMonth: {
       year: prevMonth.getFullYear(),
-      month: (prevMonth.getMonth() - 1).toLocaleString('de-DE', digitOptions)
+      short: prevMonth.toLocaleString('de-DE', {month: 'short'}),
+      long: prevMonth.toLocaleString('de-DE', {month: 'long'})
     },
-    next: {
-      label: LocalMonths[nextMonth.getMonth()],
-      year: nextMonth.getFullYear(), 
-      month: (nextMonth.getMonth() + 1).toLocaleString('de-DE', digitOptions)
+    months: getMonths(),
+    nextMonth: {
+      year: nextMonth.getFullYear(),
+      short: nextMonth.toLocaleString('de-DE', {month: 'short'}), 
+      long: nextMonth.toLocaleString('de-DE', {month: 'long'}) 
     },
     year: date.getFullYear(),
-    month: LocalMonths[date.getMonth()],
+    weekDays: getWeekDays(date), 
+    weekDay: {
+      short: date.toLocaleString('de-DE', {weekday: 'short'}), 
+      long: date.toLocaleString('de-DE', {weekday: 'long'}) 
+    },  
+    month: { 
+      year: date.getFullYear(),
+      short: date.toLocaleString('de-DE', {month: 'short'}), 
+      long: date.toLocaleString('de-DE', {month: 'long'}) 
+    }, 
     weeks: calMonth 
   }; 
 };
